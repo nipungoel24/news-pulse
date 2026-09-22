@@ -103,8 +103,41 @@ export function TimelineExplorer({ initial }: { initial: TimelineResponse }) {
             <p className="text-sm text-ink-muted">
               Fetching live RSS feeds and grouping related headlines.
             </p>
-            <Skeleton className="h-40 w-full" />
-            <Skeleton className="h-8 w-2/3" />
+            {/* Realistic timeline skeleton: 3 rows of staggered bars */}
+            <div className="border border-ink bg-paper-raised">
+              {/* Skeleton header */}
+              <div className="flex items-center justify-between border-b border-rule px-3 py-2.5">
+                <Skeleton className="h-5 w-36" />
+                <Skeleton className="h-3 w-44" />
+              </div>
+              {/* Skeleton chart rows */}
+              <div className="relative px-3 pt-8 pb-4" style={{ height: 200 }}>
+                {/* Row 0 */}
+                <div className="absolute" style={{ top: 44, left: "5%", width: "28%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                <div className="absolute" style={{ top: 44, left: "38%", width: "42%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                {/* Row 1 */}
+                <div className="absolute" style={{ top: 96, left: "12%", width: "55%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                <div className="absolute" style={{ top: 96, left: "72%", width: "18%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                {/* Row 2 */}
+                <div className="absolute" style={{ top: 148, left: "2%", width: "20%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                <div className="absolute" style={{ top: 148, left: "25%", width: "34%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+                <div className="absolute" style={{ top: 148, left: "64%", width: "30%", height: 32 }}>
+                  <Skeleton className="h-full w-full" />
+                </div>
+              </div>
+            </div>
           </div>
         ) : null}
         {timelineQuery.isError ? (

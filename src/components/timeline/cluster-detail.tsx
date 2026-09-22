@@ -1,4 +1,5 @@
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, X, FileText } from "lucide-react";
+import { useState } from "react";
 import { formatClock, formatSpan } from "@/lib/utils";
 
 export type ClusterArticle = {
@@ -22,6 +23,21 @@ export type ClusterDetailData = {
   articles: ClusterArticle[];
 };
 
+function EmptyState() {
+  return (
+    <div className="mt-8 flex flex-col items-center gap-3 py-4 text-center">
+      <FileText
+        className="size-8 text-rule-strong"
+        strokeWidth={1.25}
+        aria-hidden="true"
+      />
+      <p className="max-w-[200px] text-sm leading-relaxed text-ink-muted">
+        Click a bar on the timeline to read the headlines grouped together.
+      </p>
+    </div>
+  );
+}
+
 export function ClusterDetail({
   cluster,
   loading,
@@ -33,6 +49,17 @@ export function ClusterDetail({
   error: string | null;
   onClose: () => void;
 }) {
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  function toggleExpand(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   return (
     <aside
       className="border border-ink bg-paper-raised p-4 shadow-sheet"
@@ -49,56 +76,83 @@ export function ClusterDetail({
           <button
             type="button"
             onClick={onClose}
-            className="grid size-11 place-items-center text-ink-muted hover:text-ink"
+            className="grid size-11 shrink-0 place-items-center text-ink-muted transition-colors hover:text-ink"
             aria-label="Close cluster detail"
           >
             <X className="size-4" />
           </button>
         ) : null}
       </div>
+
       {error ? <p className="mt-3 text-sm text-oxblood">{error}</p> : null}
-      {!cluster && !loading ? (
-        <p className="mt-4 text-sm text-ink-muted">
-          Click a bar on the timeline to read the headlines that were grouped
-          together, with source and original link.
-        </p>
-      ) : null}
+
+      {!cluster && !loading ? <EmptyState /> : null}
+
       {cluster ? (
-        <>
+        /* Keyed so the panel animates in when a new cluster is selected */
+        <div
+          key={cluster.id}
+          style={{ animation: "panel-in 200ms ease-out both" }}
+        >
           <p className="mt-3 font-mono text-xs text-ink-muted">
             {cluster.articleCount} articles · {formatSpan(cluster.start, cluster.end)}
           </p>
+
+          {/* Top terms as editorial chips */}
           {cluster.topTerms.length ? (
-            <p className="mt-1 text-xs text-ink-subtle">
-              Terms: {cluster.topTerms.join(", ")}
-            </p>
-          ) : null}
-          <ol className="mt-5 space-y-4">
-            {cluster.articles.map((article) => (
-              <li key={article.id} className="border-t border-rule pt-4 first:border-t-0 first:pt-0">
-                <p className="font-mono text-[11px] tracking-wide text-ink-muted uppercase">
-                  {article.sourceName} · {formatClock(article.publishedAt)}
-                </p>
-                <a
-                  href={article.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 inline-flex items-start gap-2 text-base font-medium hover:underline"
+            <div className="mt-2 flex flex-wrap gap-1">
+              {cluster.topTerms.map((term) => (
+                <span
+                  key={term}
+                  className="border border-rule px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-ink-subtle uppercase"
                 >
-                  <span>{article.title}</span>
-                  <ExternalLink className="mt-1 size-3.5 shrink-0" aria-hidden="true" />
-                </a>
-                {article.summary ? (
-                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                    {article.summary.length > 220
-                      ? `${article.summary.slice(0, 217).trimEnd()}...`
-                      : article.summary}
+                  {term}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          <ol className="mt-5 space-y-4">
+            {cluster.articles.map((article) => {
+              const expanded = expandedIds.has(article.id);
+              const longSummary = article.summary && article.summary.length > 280;
+              return (
+                <li key={article.id} className="border-t border-rule pt-4 first:border-t-0 first:pt-0">
+                  <p className="font-mono text-[11px] tracking-wide text-ink-muted uppercase">
+                    {article.sourceName} · {formatClock(article.publishedAt)}
                   </p>
-                ) : null}
-              </li>
-            ))}
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-flex items-start gap-2 text-base font-medium transition-opacity hover:opacity-75"
+                  >
+                    <span>{article.title}</span>
+                    <ExternalLink className="mt-1 size-3.5 shrink-0" aria-hidden="true" />
+                  </a>
+                  {article.summary ? (
+                    <div className="mt-2">
+                      <p className="text-sm leading-relaxed text-ink-muted">
+                        {longSummary && !expanded
+                          ? `${article.summary.slice(0, 277).trimEnd()}…`
+                          : article.summary}
+                      </p>
+                      {longSummary ? (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(article.id)}
+                          className="mt-1 text-[11px] text-ink-subtle underline-offset-2 hover:text-ink hover:underline"
+                        >
+                          {expanded ? "Show less" : "Read more"}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
           </ol>
-        </>
+        </div>
       ) : null}
     </aside>
   );

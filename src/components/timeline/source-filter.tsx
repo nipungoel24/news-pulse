@@ -12,7 +12,7 @@ export function SourceFilter({
   return (
     <fieldset>
       <legend className="text-[11px] tracking-[0.18em] text-ink-muted uppercase">Sources</legend>
-      <div className="mt-2 flex flex-wrap gap-1">
+      <div className="mt-2 flex flex-wrap gap-1.5">
         {sources.map((source) => {
           const on = enabled.has(source.id);
           return (
@@ -23,9 +23,9 @@ export function SourceFilter({
               aria-pressed={on}
               onClick={() => onToggle(source.id)}
               className={cn(
-                "h-11 border px-3 text-sm",
+                "h-8 rounded-xs border px-3 text-sm transition-colors duration-150",
                 on
-                  ? "border-ink bg-ink text-paper"
+                  ? "border-ink bg-ink font-medium text-paper"
                   : "border-rule bg-paper-raised text-ink-muted hover:border-ink hover:text-ink",
               )}
             >
