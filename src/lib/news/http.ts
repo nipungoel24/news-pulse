@@ -61,3 +61,11 @@ export async function handleJobStatus(jobId: string) {
     return fail(error);
   }
 }
+
+export async function handleHealthCheck() {
+  return json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    service: "news-pulse",
+  });
+}

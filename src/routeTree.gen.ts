@@ -13,11 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ClustersRouteImport } from './routes/clusters'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as ApiClustersRouteImport } from './routes/api/clusters'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiTimelineRouteImport } from './routes/api/timeline'
 import { Route as ClustersIdRouteImport } from './routes/clusters.$id'
 import { Route as IngestTriggerRouteImport } from './routes/ingest.trigger'
@@ -46,6 +48,11 @@ const ClustersRoute = ClustersRouteImport.update({
   path: '/clusters',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -69,6 +76,11 @@ const TimelineRoute = TimelineRouteImport.update({
 const ApiClustersRoute = ApiClustersRouteImport.update({
   id: '/api/clusters',
   path: '/api/clusters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTimelineRoute = ApiTimelineRouteImport.update({
@@ -112,11 +124,13 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/clusters': typeof ClustersRouteWithChildren
+  '/health': typeof HealthRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/timeline': typeof TimelineRoute
   '/api/clusters': typeof ApiClustersRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
   '/api/timeline': typeof ApiTimelineRoute
   '/clusters/$id': typeof ClustersIdRoute
   '/ingest/trigger': typeof IngestTriggerRoute
@@ -130,11 +144,13 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/clusters': typeof ClustersRouteWithChildren
+  '/health': typeof HealthRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/timeline': typeof TimelineRoute
   '/api/clusters': typeof ApiClustersRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
   '/api/timeline': typeof ApiTimelineRoute
   '/clusters/$id': typeof ClustersIdRoute
   '/ingest/trigger': typeof IngestTriggerRoute
@@ -149,11 +165,13 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/clusters': typeof ClustersRouteWithChildren
+  '/health': typeof HealthRoute
   '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/timeline': typeof TimelineRoute
   '/api/clusters': typeof ApiClustersRouteWithChildren
+  '/api/health': typeof ApiHealthRoute
   '/api/timeline': typeof ApiTimelineRoute
   '/clusters/$id': typeof ClustersIdRoute
   '/ingest/trigger': typeof IngestTriggerRoute
@@ -169,11 +187,13 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/clusters'
+    | '/health'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
     | '/timeline'
     | '/api/clusters'
+    | '/api/health'
     | '/api/timeline'
     | '/clusters/$id'
     | '/ingest/trigger'
@@ -187,11 +207,13 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/clusters'
+    | '/health'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
     | '/timeline'
     | '/api/clusters'
+    | '/api/health'
     | '/api/timeline'
     | '/clusters/$id'
     | '/ingest/trigger'
@@ -205,11 +227,13 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/clusters'
+    | '/health'
     | '/privacy'
     | '/sitemap.xml'
     | '/terms'
     | '/timeline'
     | '/api/clusters'
+    | '/api/health'
     | '/api/timeline'
     | '/clusters/$id'
     | '/ingest/trigger'
@@ -224,11 +248,13 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   AboutRoute: typeof AboutRoute
   ClustersRoute: typeof ClustersRouteWithChildren
+  HealthRoute: typeof HealthRoute
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TimelineRoute: typeof TimelineRoute
   ApiClustersRoute: typeof ApiClustersRouteWithChildren
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiTimelineRoute: typeof ApiTimelineRoute
   IngestTriggerRoute: typeof IngestTriggerRoute
   ApiIngestTriggerRoute: typeof ApiIngestTriggerRoute
@@ -266,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClustersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -299,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/api/clusters'
       fullPath: '/api/clusters'
       preLoaderRoute: typeof ApiClustersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/timeline': {
@@ -382,11 +422,13 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   AboutRoute: AboutRoute,
   ClustersRoute: ClustersRouteWithChildren,
+  HealthRoute: HealthRoute,
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TimelineRoute: TimelineRoute,
   ApiClustersRoute: ApiClustersRouteWithChildren,
+  ApiHealthRoute: ApiHealthRoute,
   ApiTimelineRoute: ApiTimelineRoute,
   IngestTriggerRoute: IngestTriggerRoute,
   ApiIngestTriggerRoute: ApiIngestTriggerRoute,

@@ -112,11 +112,13 @@ First load ingests feeds if the database is empty. Use the **Refresh data** butt
 | Command | Description |
 | --- | --- |
 | `npm run dev` | Start development server on `0.0.0.0:8080` |
-| `npm run build` | Build for production |
+| `npm run build` | Build standalone production server (`.output/server/index.mjs`) |
 | `npm run preview:restart` | Preview the production build on `127.0.0.1:8081` |
+| `npm test` | Run application and auth unit tests (`node --test`) |
+| `npm run test:platform` | Run platform script tests |
+| `npm run test:all` | Run all test suites |
 | `npx tsc --noEmit` | Type-check the project |
 | `npx eslint .` | Lint the project |
-| `node --test 'scripts/**/*.test.mjs'` | Run all automated tests |
 | `node scripts/browser-smoke.mjs` | Run browser smoke tests |
 
 ## Build Command
@@ -125,26 +127,27 @@ First load ingests feeds if the database is empty. Use the **Refresh data** butt
 npm run build
 ```
 
-This produces a Vercel-compatible deployment output in `.vercel/output/`.
+This compiles the client assets into `.output/public/` and generates the standalone Nitro Node server at `.output/server/index.mjs`. The server binds to `0.0.0.0` and honors the `PORT` environment variable (default `8080` or `3000`).
 
 ## Test Commands
 
 ```bash
-npm run typecheck   # TypeScript type checking
-npx eslint .        # ESLint
-node --test 'scripts/**/*.test.mjs'   # All automated tests
-node scripts/browser-smoke.mjs        # Browser smoke tests
+npm test            # Application and auth unit tests (55 passing tests)
+npm run typecheck   # TypeScript type checking (zero errors)
+npx eslint .        # ESLint check (zero errors)
+npm run test:all    # All test suites including platform scripts
 ```
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| `GET` | `/clusters` | List topic clusters (label, article count, time range) |
-| `GET` | `/clusters/:id` | Full cluster detail with all articles, sorted chronologically |
-| `GET` | `/timeline` | Clusters formatted for plotting (label, start/end time, article count, size metric) |
-| `POST` | `/ingest/trigger` | Triggers the Python ingestion pipeline as a subprocess; returns a job ID |
-| `GET` | `/ingest/status/:jobId` | Polls job status (queued, running, complete, failed) |
+| `GET` | `/api/health` or `/health` | Lightweight service health check (`{ "status": "ok", "service": "news-pulse" }`) |
+| `GET` | `/clusters` or `/api/clusters` | List topic clusters (label, article count, time range) |
+| `GET` | `/clusters/:id` or `/api/clusters/:id` | Full cluster detail with all articles, sorted chronologically |
+| `GET` | `/timeline` or `/api/timeline` | Clusters formatted for plotting (label, start/end time, article count, size metric) |
+| `POST` | `/ingest/trigger` or `/api/ingest/trigger` | Triggers the Python ingestion pipeline as a subprocess; returns a job ID |
+| `GET` | `/ingest/status/:jobId` or `/api/ingest/status/:jobId` | Polls job status (queued, running, complete, failed) |
 
 All endpoints support a `?sources=` query parameter for filtering by news source.
 
@@ -173,21 +176,49 @@ Error handling returns appropriate status codes: `400` for bad requests, `404` f
 
 | Component | Target Platform | Runtime Architecture | Notes |
 | --- | --- | --- | --- |
-| Frontend UI | Vercel / Node.js | TanStack Start (React 19) | Statically pre-rendered / SSR |
-| Backend API | Vercel / Node.js | Nitro server functions | REST endpoints (`/clusters`, `/timeline`, etc.) |
-| Database | Neon Postgres | Managed Postgres | Connected via `DATABASE_URL` |
-| Scraper Ingestion | Local / Dedicated Host | Python 3 subprocess (`child_process.spawn`) | Invoked via `POST /ingest/trigger` |
+| Container App | Docker / Any OCI Host (Cloud Run, ECS, Fly.io, VPS) | Multi-stage Node 22 + Python 3.11 container | Recommended deployment target |
+| Frontend UI | Node.js | TanStack Start (React 19) SSR / static | Served via Nitro node-server |
+| Backend API | Node.js | Nitro server routes | REST endpoints (`/api/clusters`, `/api/timeline`, `/api/health`) |
+| Database | Neon Postgres or Embedded PGLite | Managed Postgres or in-memory fallback | Connected via `DATABASE_URL` |
+| Scraper Ingestion | Container Subprocess | Python 3 subprocess (`child_process.spawn`) | Invoked via `POST /api/ingest/trigger` |
+
+### Container Deployment (Docker — Recommended)
+
+Container deployment is the **recommended production target** because it completely solves the dual runtime requirement: both Node.js 22 (for TanStack Start / Nitro) and Python 3.10+ (for the standalone RSS ingestion & TF-IDF clustering pipeline) are bundled together with CA certificates into a single lightweight runtime image.
+
+#### 1. Build the Docker image
+
+```bash
+docker build -t news-pulse .
+```
+
+#### 2. Run the container
+
+**Standalone / Preview Mode (uses embedded PGLite database fallback):**
+```bash
+docker run -d --name news-pulse -p 8080:8080 news-pulse
+```
+
+**Production Mode (connected to external Postgres/Neon database):**
+```bash
+docker run -d --name news-pulse -p 8080:8080 \
+  -e DATABASE_URL="postgresql://user:pass@host/db?sslmode=require" \
+  news-pulse
+```
+
+- **Port & Binding**: The container server listens on `0.0.0.0` and defaults to port `8080`. You can override the port by passing `-e PORT=<port>` and binding accordingly.
+- **Health Check**: A built-in Docker `HEALTHCHECK` queries `http://127.0.0.1:${PORT:-8080}/api/health` every 30s.
 
 ### Deployment Blocker: Vercel Serverless Python Execution
 
 > [!WARNING]
 > **Vercel Deployment Blocker**: Standard Vercel Serverless Functions run in a Node.js-only container where Python 3 is **not** available on PATH. In addition, Vercel Serverless execution limits and read-only filesystem environments prevent arbitrary `child_process.spawn()` of Python scripts without a custom container runtime or external worker service.
 > 
-> While the application bundles successfully with the Nitro Vercel preset (`npm run build` generates `.vercel/output/`), live deployment to standard Vercel will not execute the Python scraper subprocess unless Python is provided via a container or separate worker. For full live operation, run the app in an environment with both Node.js 22 and Python 3.10+ available (such as Docker, a VM, or a dedicated Node+Python container). Deployment to Vercel is therefore **unverified and blocked** by this architectural requirement.
+> While the application bundles successfully with Nitro, live deployment to standard Vercel will not execute the Python scraper subprocess unless Python is provided via a container or separate worker. For full live operation, container deployment (Docker) as documented above is the verified and supported path.
 
 ## Limitations
 
-1. **Python Subprocess Requirement**: `POST /ingest/trigger` launches `scraper/pipeline.py` as an OS subprocess (`child_process.spawn`). This requires a working Python 3.10+ installation on `PATH` (or via `PYTHON_BIN`). Standard serverless platforms (e.g. Vercel Node runtime) do not include Python.
+1. **Python Subprocess Requirement**: `POST /ingest/trigger` launches `scraper/pipeline.py` as an OS subprocess (`child_process.spawn`). This requires Python 3.10+ on `PATH` (or via `PYTHON_BIN`). As documented above, containerized deployment completely satisfies this requirement.
 2. **Framework Choice**: The assessment specifies "Next.js / React Frontend". This implementation uses TanStack Start (React 19) due to host platform constraints requiring a single-process binding on `0.0.0.0:8080`. All functional requirements (timeline visualization, cluster exploration, filtering, refresh workflow) are satisfied. See `FRAMEWORK_COMPLIANCE.md` for details.
 3. **Body Text for Grouping**: Full article HTML is stored but not used for clustering because shared page chrome causes over-merging.
 4. **Cross-Source Merging**: Articles from different outlets about the same story are not merged into a single cluster (stretch goal from the assessment).

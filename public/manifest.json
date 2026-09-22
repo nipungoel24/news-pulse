@@ -1,0 +1,16 @@
+{
+  "name": "News Pulse",
+  "short_name": "NewsPulse",
+  "description": "Topic-clustered news timeline from BBC, NPR, The Guardian, and Al Jazeera.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F1ECE3",
+  "theme_color": "#F1ECE3",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
