@@ -39,8 +39,11 @@ npm-debug.log*
 # Generated QA artifacts
 screenshots/
 
-# Platform config
+# Platform & Agent artifacts
 .grok/
+.agents/
+artifacts/
+attachments/
 startup.sh
 
 # Generated data

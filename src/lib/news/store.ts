@@ -53,7 +53,12 @@ export async function loadExistingArticles(): Promise<Article[]> {
 export async function persistDocument(doc: PipelineDocument): Promise<void> {
   const sql = await getSql();
 
-  for (const article of doc.articles) {
+  for (const rawArticle of doc.articles) {
+    const article = rawArticle as unknown as Record<string, unknown>;
+    const sourceId = (article.sourceId ?? article.source_id) as string;
+    const sourceName = (article.sourceName ?? article.source_name) as string;
+    const publishedAt = (article.publishedAt ?? article.published_at ?? null) as string | null;
+
     await sql.query(
       `insert into articles (id, url, title, summary, body, source_id, source_name, published_at)
        values ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -70,9 +75,9 @@ export async function persistDocument(doc: PipelineDocument): Promise<void> {
         article.title,
         article.summary,
         article.body,
-        article.sourceId,
-        article.sourceName,
-        article.publishedAt,
+        sourceId,
+        sourceName,
+        publishedAt,
       ],
     );
   }
@@ -82,7 +87,14 @@ export async function persistDocument(doc: PipelineDocument): Promise<void> {
   `;
   const generation = Number(genRows[0]?.value ?? "0") + 1;
 
-  for (const cluster of doc.clusters) {
+  for (const rawCluster of doc.clusters) {
+    const cluster = rawCluster as unknown as Record<string, unknown>;
+    const rawTerms = (cluster.topTerms ?? cluster.top_terms ?? []) as string[];
+    const topTerms = Array.isArray(rawTerms) ? rawTerms.join(", ") : String(rawTerms);
+    const articleCount = Number(cluster.articleCount ?? cluster.article_count ?? 0);
+    const rawArticleIds = (cluster.articleIds ?? cluster.article_ids ?? []) as string[];
+    const articleIds = Array.isArray(rawArticleIds) ? rawArticleIds : [];
+
     await sql.query(
       `insert into clusters (id, label, top_terms, article_count, start_at, end_at, intensity, generation, active)
        values ($1,$2,$3,$4,$5,$6,$7,$8,true)
@@ -98,15 +110,15 @@ export async function persistDocument(doc: PipelineDocument): Promise<void> {
       [
         cluster.id,
         cluster.label,
-        cluster.topTerms.join(", "),
-        cluster.articleCount,
+        topTerms,
+        articleCount,
         cluster.start,
         cluster.end,
         cluster.intensity,
         generation,
       ],
     );
-    for (const articleId of cluster.articleIds) {
+    for (const articleId of articleIds) {
       await sql.query(
         `insert into cluster_articles (cluster_id, article_id)
          values ($1,$2)
@@ -128,7 +140,7 @@ export async function persistDocument(doc: PipelineDocument): Promise<void> {
   await sql.query(
     `insert into ingest_meta (key, value) values ('last_run', $1)
      on conflict (key) do update set value = excluded.value`,
-    [doc.generatedAt],
+    [doc.generatedAt ?? (doc as unknown as { generated_at?: string }).generated_at ?? new Date().toISOString()],
   );
 }
 

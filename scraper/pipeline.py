@@ -27,8 +27,7 @@ from xml.etree import ElementTree as ET
 from cluster import cluster_articles
 
 USER_AGENT = (
-    "Mozilla/5.0 (compatible; NewsPulse/1.0; educational research; "
-    "+https://github.com/nipungoel24/agent-forge)"
+    "Mozilla/5.0 (compatible; NewsPulse/1.0; educational research)"
 )
 TIMEOUT = 12
 BODY_TIMEOUT = 6
@@ -317,8 +316,7 @@ def main() -> int:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(text, encoding="utf-8")
     if args.stdout or not args.out:
-        sys.stdout.write(text)
-        sys.stdout.write("\n")
+        sys.stdout.buffer.write(text.encode("utf-8") + b"\n")
     return 0
 
 

@@ -35,8 +35,8 @@ This workspace is a single TanStack Start app because the preview host must bind
 
 - **Node.js 22** (required for the build tooling and runtime)
 - **Python 3.10+** (required for the standalone scraper; `POST /ingest/trigger` launches it as a subprocess)
-  - Windows: `C:\Users\Nipun\AppData\Local\Programs\Python\Python314\python.exe`
-  - Linux/macOS: `python3` or `python`
+  - `python3` or `python` available on `PATH`
+  - Optional: set `PYTHON_BIN` environment variable to specify an explicit Python binary path
 - **npm** (comes with Node.js)
 
 ## Installation
@@ -63,6 +63,7 @@ The scraper uses only Python standard library (no pip packages required). Ensure
 | Variable | Description | Required |
 | --- | --- | --- |
 | `DATABASE_URL` | Connection string for the database (Postgres/Neon in production, PGLite in preview) | Yes |
+| `PYTHON_BIN` | Explicit path or command for the Python binary (e.g. `/usr/bin/python3` or custom path) | No (defaults to `python3` / `python` on PATH) |
 
 `DATABASE_URL` is injected by the hosting platform on deploy. For local development, it is configured by the workspace. Never commit `.env` files or database credentials.
 
@@ -168,39 +169,29 @@ Error handling returns appropriate status codes: `400` for bad requests, `404` f
 - Auto-generates cluster labels from top TF-IDF terms
 - Articles are stored with full body text for reading but only headline+summary is used for grouping (full body caused over-merging due to shared HTML chrome)
 
-## Deployment
+## Deployment Architecture & Considerations
 
-| Component | Platform | Notes |
-| --- | --- | --- |
-| Frontend | Vercel | TanStack Start app |
-| Backend API | Vercel | Nitro server functions |
-| Database | Neon Postgres | `DATABASE_URL` env var |
-| Python pipeline | Local / GitHub Actions | Run via `POST /ingest/trigger` subprocess |
+| Component | Target Platform | Runtime Architecture | Notes |
+| --- | --- | --- | --- |
+| Frontend UI | Vercel / Node.js | TanStack Start (React 19) | Statically pre-rendered / SSR |
+| Backend API | Vercel / Node.js | Nitro server functions | REST endpoints (`/clusters`, `/timeline`, etc.) |
+| Database | Neon Postgres | Managed Postgres | Connected via `DATABASE_URL` |
+| Scraper Ingestion | Local / Dedicated Host | Python 3 subprocess (`child_process.spawn`) | Invoked via `POST /ingest/trigger` |
 
-### Deploy to Vercel
+### Deployment Blocker: Vercel Serverless Python Execution
 
-```bash
-npm run build
-# Deploy the .vercel/output/ directory via Vercel CLI or dashboard
-```
-
-Configure `DATABASE_URL` as an environment variable on the hosting platform. Do not commit secrets.
-
-### What runs where
-
-| Piece | Preview | Deploy |
-| --- | --- | --- |
-| UI + REST | TanStack Start | Vercel |
-| Ingest | Python subprocess via Node.js | Python subprocess via Node.js |
-| Database | PGLite | Neon Postgres |
+> [!WARNING]
+> **Vercel Deployment Blocker**: Standard Vercel Serverless Functions run in a Node.js-only container where Python 3 is **not** available on PATH. In addition, Vercel Serverless execution limits and read-only filesystem environments prevent arbitrary `child_process.spawn()` of Python scripts without a custom container runtime or external worker service.
+> 
+> While the application bundles successfully with the Nitro Vercel preset (`npm run build` generates `.vercel/output/`), live deployment to standard Vercel will not execute the Python scraper subprocess unless Python is provided via a container or separate worker. For full live operation, run the app in an environment with both Node.js 22 and Python 3.10+ available (such as Docker, a VM, or a dedicated Node+Python container). Deployment to Vercel is therefore **unverified and blocked** by this architectural requirement.
 
 ## Limitations
 
-1. **Python subprocess**: `POST /ingest/trigger` launches the Python pipeline as a subprocess. This requires Python to be available on the system PATH. If Python is unavailable, the endpoint returns a `500` error.
-2. **Framework**: The assessment specifies "Next.js / React Frontend". This implementation uses TanStack Start (React 19) due to host platform constraints that require a single-process binding on `0.0.0.0:8080`. All functional requirements (timeline visualization, cluster exploration, filtering, refresh workflow) are satisfied. See `FRAMEWORK_COMPLIANCE.md` for details.
-3. **Body text for grouping**: Full article HTML is stored but not used for clustering because shared page chrome causes over-merging.
-4. **Cross-source merging**: Articles from different outlets about the same story are not merged into a single cluster (stretch goal from the assessment).
-5. **Walkthrough video**: The required 2-3 minute walkthrough video must be recorded externally and is not part of this codebase.
+1. **Python Subprocess Requirement**: `POST /ingest/trigger` launches `scraper/pipeline.py` as an OS subprocess (`child_process.spawn`). This requires a working Python 3.10+ installation on `PATH` (or via `PYTHON_BIN`). Standard serverless platforms (e.g. Vercel Node runtime) do not include Python.
+2. **Framework Choice**: The assessment specifies "Next.js / React Frontend". This implementation uses TanStack Start (React 19) due to host platform constraints requiring a single-process binding on `0.0.0.0:8080`. All functional requirements (timeline visualization, cluster exploration, filtering, refresh workflow) are satisfied. See `FRAMEWORK_COMPLIANCE.md` for details.
+3. **Body Text for Grouping**: Full article HTML is stored but not used for clustering because shared page chrome causes over-merging.
+4. **Cross-Source Merging**: Articles from different outlets about the same story are not merged into a single cluster (stretch goal from the assessment).
+5. **Walkthrough Video**: The required 2-3 minute walkthrough video must be recorded externally and is not part of this codebase.
 
 ## Assumptions
 

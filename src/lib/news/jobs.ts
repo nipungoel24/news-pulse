@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { IngestJob } from "@backend/types.ts";
@@ -27,22 +27,45 @@ async function save(job: IngestJob) {
 }
 
 function getPythonCommand(): string {
-  const candidates = [
-    "C:\\Users\\Nipun\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
-    "C:\\Python314\\python.exe",
-    "/usr/bin/python3",
-    "/usr/bin/python",
-    "python3",
-    "python",
-  ];
-  for (const cmd of candidates) {
+  // 1. Explicit environment variable if specified
+  if (process.env.PYTHON_BIN) {
+    return process.env.PYTHON_BIN;
+  }
+
+  // 2. Test standard PATH commands
+  const pathCandidates = ["python3", "python"];
+  for (const cmd of pathCandidates) {
     try {
-      if (existsSync(cmd)) return cmd;
+      const check = spawnSync(cmd, ["--version"], { stdio: "ignore" });
+      if (check.status === 0) return cmd;
     } catch {
-      continue;
+      // not found on PATH
     }
   }
-  return "python3";
+
+  // 3. On Windows, check standard installation directories dynamically without user-specific paths
+  if (process.platform === "win32") {
+    const versionDirs = ["Python314", "Python313", "Python312", "Python311", "Python310"];
+    const baseDirs: string[] = [];
+    if (process.env.LOCALAPPDATA) {
+      baseDirs.push(join(process.env.LOCALAPPDATA, "Programs", "Python"));
+    }
+    if (process.env.ProgramFiles) {
+      baseDirs.push(join(process.env.ProgramFiles, "Python"));
+    }
+    for (const base of baseDirs) {
+      for (const ver of versionDirs) {
+        const full = join(base, ver, "python.exe");
+        try {
+          if (existsSync(full)) return full;
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  return process.platform === "win32" ? "python" : "python3";
 }
 
 async function runPipelineSubprocess(): Promise<PipelineDocument> {
@@ -52,7 +75,7 @@ async function runPipelineSubprocess(): Promise<PipelineDocument> {
     const proc = spawn(pythonCmd, args, {
       cwd: process.cwd(),
       shell: false,
-      env: { ...process.env },
+      env: { ...process.env, PYTHONIOENCODING: "utf-8" },
     });
 
     let stdout = "";
