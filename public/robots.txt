@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /ingest/
+Disallow: /api/ingest/
+
+Sitemap: /sitemap.xml

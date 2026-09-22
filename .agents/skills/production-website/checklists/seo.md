@@ -1,0 +1,22 @@
+# SEO Checklist
+
+- [ ] Unique title on every public page
+- [ ] Unique meta description
+- [ ] Canonical URL
+- [ ] Correct html lang
+- [ ] OG title
+- [ ] OG description
+- [ ] OG image
+- [ ] OG URL
+- [ ] Twitter/X card where appropriate
+- [ ] Favicon
+- [ ] robots.txt
+- [ ] sitemap.xml
+- [ ] llms.txt where applicable
+- [ ] One clear primary H1
+- [ ] Internal links
+- [ ] Breadcrumbs where useful
+- [ ] Truthful structured data
+- [ ] LocalBusiness schema only with real business facts
+- [ ] No accidental noindex
+- [ ] No accidental crawler blocking

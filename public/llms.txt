@@ -1,0 +1,16 @@
+# News Pulse
+
+> Topic-clustered news timeline. Public RSS from BBC, NPR, The Guardian, and Al Jazeera is grouped with TF-IDF cosine similarity and plotted on a time axis.
+
+## Pages
+- [Timeline](/): cluster bars from earliest to latest article
+- [Method](/about): sources, grouping rules, limitations
+- [Privacy](/privacy)
+- [Terms](/terms)
+
+## API
+- GET /clusters
+- GET /clusters/:id
+- GET /timeline
+- POST /ingest/trigger
+- GET /ingest/status/:jobId

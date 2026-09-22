@@ -1,0 +1,61 @@
+# Design.md
+
+## Visual direction
+A broadsheet masthead on warm newsprint. Black-ink type, hairline rules, one oxblood signal for live/selection. The timeline should read like a compositor's galley: labeled bars laid on a dated rail, not a dashboard chart.
+
+## Tokens
+### Colors
+- background: paper `#F1ECE3`
+- surface: paper-raised `#F7F3EB`
+- text: ink `#1C1915`
+- muted: ink-muted `#5C564C`
+- border: rule `#D4CCC0`
+- focus: oxblood `#9C2B1A`
+- primary: oxblood `#9C2B1A`
+- success: forest `#2F6B4F`
+- warning: bronze `#8A5A2B`
+- error: oxblood `#9C2B1A`
+
+Cluster inks (timeline only): navy, umber, pine, slate, bronze, oxblood-muted, charcoal.
+
+### Typography
+- display: Fraunces (masthead, cluster labels)
+- body: Figtree
+- mono: ui-monospace for timestamps
+- heading scale: masthead ~3rem, section ~1.5rem
+- body scale: 16px / 1.5
+
+### Layout
+- max width: 1120px
+- mobile gutter: 16px
+- section spacing: 24–48px
+- breakpoints: 390 / 768 / 1100
+
+### Shape
+- control radius: 4px
+- card radius: 8px
+- large radius: 12px (sheet only)
+
+### Elevation
+- Hairline rules over shadows. One soft shadow on the cluster sheet.
+
+## Components
+- Button: rectangular, ink outline or oxblood solid
+- Source filter: toggle buttons with a bottom rule when on
+- Timeline bar: rounded 2px, height by article count
+- Sheet: paper surface, article list
+- Skeleton: rule-colored pulse
+- Empty/error: plain ink copy, retry control
+
+## Icons
+- UI icon source: lucide-react
+- Morphicons: not required
+- theSVG: not used (no licensed outlet marks; source names are typeset)
+
+## Motion
+- Sheet open 250ms / close 150ms, opacity + translate
+- Bar hover: opacity only
+- Reduced motion: instant state, no pulse on live dot
+
+## Content
+Specific, concise, truthful. Attribution always names the outlet. No emoji. No em dashes.

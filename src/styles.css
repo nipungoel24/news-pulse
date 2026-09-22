@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-paper: #f1ece3;
+  --color-paper-raised: #f7f3eb;
+  --color-ink: #1c1915;
+  --color-ink-muted: #5c564c;
+  --color-ink-subtle: #8a8378;
+  --color-rule: #d4ccc0;
+  --color-rule-strong: #b9b09f;
+  --color-oxblood: #9c2b1a;
+  --color-oxblood-fg: #f7f3eb;
+  --color-forest: #2f6b4f;
+  --color-bronze: #8a5a2b;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-sheet: 0 18px 40px -24px rgb(28 25 21 / 0.45);
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100dvh;
+    background:
+      linear-gradient(180deg, rgb(241 236 227 / 0) 0%, rgb(241 236 227 / 1) 28%),
+      repeating-linear-gradient(
+        90deg,
+        rgb(28 25 21 / 0.015) 0,
+        rgb(28 25 21 / 0.015) 1px,
+        transparent 1px,
+        transparent 28px
+      );
+    background-color: var(--color-paper);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-oxblood);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    font-family: var(--font-display);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,26 @@
+# Launch Checklist
+
+- [ ] Custom domain
+- [ ] HTTPS
+- [ ] Canonical host
+- [ ] Redirects
+- [ ] Favicon
+- [ ] Titles/descriptions
+- [ ] Canonicals
+- [ ] OG/social preview
+- [ ] robots.txt
+- [ ] sitemap.xml
+- [ ] llms.txt
+- [ ] Privacy Policy
+- [ ] Terms
+- [ ] Custom 404
+- [ ] Analytics only if intentionally configured
+- [ ] Console clean
+- [ ] Critical network requests clean
+- [ ] Links verified
+- [ ] Forms verified
+- [ ] Mobile verified
+- [ ] Accessibility verified
+- [ ] Production source maps not publicly exposed
+- [ ] No placeholder/scaffold content
+- [ ] No fake proof

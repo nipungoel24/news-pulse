@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "agent-forge-bootstrap": {
+      "source": "nipungoel24/agent-forge",
+      "sourceType": "github",
+      "skillPath": "skills/agent-forge-bootstrap/SKILL.md",
+      "computedHash": "bd12409beb50bf0d98daaf54bddbf7f6b5c1f2701309c2b049381b6940f2fbdb"
+    },
+    "make-this-project": {
+      "source": "nipungoel24/agent-forge",
+      "sourceType": "github",
+      "skillPath": "skills/make-this-project/SKILL.md",
+      "computedHash": "056e730e7846cced4d76ed6070121f55100a04e3f909510f709aecdc052b6359"
+    },
+    "production-website": {
+      "source": "nipungoel24/agent-forge",
+      "sourceType": "github",
+      "skillPath": "skills/production-website/SKILL.md",
+      "computedHash": "b7fdf7d32a3ec9dde183a5a32815548eee0fb3a885b1090dee4e311009e09b23"
+    }
+  }
+}
