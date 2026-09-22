@@ -176,7 +176,7 @@ Error handling returns appropriate status codes: `400` for bad requests, `404` f
 
 | Component | Target Platform | Runtime Architecture | Notes |
 | --- | --- | --- | --- |
-| Container App | Docker / Any OCI Host (Cloud Run, ECS, Fly.io, VPS) | Multi-stage Node 22 + Python 3.11 container | Recommended deployment target |
+| Container App | Docker / Any OCI Host (Cloud Run, ECS, Fly.io, VPS, Railway) | Multi-stage Node 22 + Python 3.11 container | Recommended deployment target |
 | Frontend UI | Node.js | TanStack Start (React 19) SSR / static | Served via Nitro node-server |
 | Backend API | Node.js | Nitro server routes | REST endpoints (`/api/clusters`, `/api/timeline`, `/api/health`) |
 | Database | Neon Postgres or Embedded PGLite | Managed Postgres or in-memory fallback | Connected via `DATABASE_URL` |
@@ -208,6 +208,31 @@ docker run -d --name news-pulse -p 8080:8080 \
 
 - **Port & Binding**: The container server listens on `0.0.0.0` and defaults to port `8080`. You can override the port by passing `-e PORT=<port>` and binding accordingly.
 - **Health Check**: A built-in Docker `HEALTHCHECK` queries `http://127.0.0.1:${PORT:-8080}/api/health` every 30s.
+
+### Live Deployment (Railway)
+
+The application is deployed and verified on Railway:
+
+- **Public URL**: https://news-pulse-production-4cef.up.railway.app
+- **Status**: Online and fully functional
+- **Deployed Commit**: `46e3fad` (feat: prepare container deployment)
+- **Database**: Embedded PGLite (in-memory, ephemeral — data does not survive redeployment/restart)
+- **Verified**: All API endpoints, ingestion pipeline, and frontend UI
+
+#### Verified Endpoints
+
+| Endpoint | Status | Notes |
+| --- | --- | --- |
+| `GET /api/health` | ✅ OK | `{ "status": "ok", "service": "news-pulse" }` |
+| `GET /api/clusters` | ✅ OK | Returns 45 topic clusters |
+| `GET /api/timeline` | ✅ OK | Returns 45 timeline items across 4 sources |
+| `POST /api/ingest/trigger` | ✅ OK | Job `job_09bcddae1126` completed in 3s |
+| `GET /api/ingest/status/:jobId` | ✅ OK | 46 articles ingested, 45 clusters built |
+| Frontend (/) | ✅ OK | SSR-rendered timeline with all clusters |
+
+#### Persistence Limitation
+
+The Railway deployment uses the **embedded PGLite database fallback** (no `DATABASE_URL` configured). PGLite runs entirely in-memory within the container process. **All ingested articles and clusters will be lost on container restart, redeployment, or Railway service restart.** For production durability, configure a `DATABASE_URL` pointing to a managed Postgres instance (e.g., Neon).
 
 ### Deployment Blocker: Vercel Serverless Python Execution
 
