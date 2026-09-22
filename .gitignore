@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+
+# Build output
+.vercel/
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.python-cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Generated QA artifacts
+screenshots/
+
+# Platform config
+.grok/
+startup.sh
+
+# Generated data
+scraper/data/
+
+# Test fixtures
+.vercel/output/
+
+# Vercel config (platform injected)
+.vercel/
+
+# Temporary files
+tmp/
+temp/
+
+# Git
+.git/
+
+# CI
+.github/
+.gitlab-ci.yml
+
+# Coverage
+coverage/
+.nyc_output/
