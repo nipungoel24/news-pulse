@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [client] = useState(
@@ -14,5 +15,10 @@ export function QueryProvider({ children }: { children: ReactNode }) {
         },
       }),
   );
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={client}>
+      <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+    </QueryClientProvider>
+  );
 }
+

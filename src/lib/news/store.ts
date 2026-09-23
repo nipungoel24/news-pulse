@@ -389,3 +389,59 @@ export function httpErrorStatus(error: unknown): number {
   }
   return 500;
 }
+
+export type ArticleEvent = {
+  id: string;
+  clusterId: string;
+  clusterLabel: string;
+  sourceId: string;
+  sourceName: string;
+  publishedAt: string;
+  title: string;
+  url: string;
+};
+
+/** Lightweight article events for the source-lane timeline visualization. */
+export async function getArticleEvents(sourcesParam: string | null): Promise<ArticleEvent[]> {
+  const sources = parseSources(sourcesParam);
+  const sql = await getSql();
+  const rows = await sql<{
+    article_id: string;
+    cluster_id: string;
+    cluster_label: string;
+    source_id: string;
+    source_name: string;
+    published_at: string | null;
+    title: string;
+    url: string;
+  }>`
+    select a.id as article_id,
+           c.id as cluster_id,
+           c.label as cluster_label,
+           a.source_id,
+           a.source_name,
+           a.published_at,
+           a.title,
+           a.url
+    from articles a
+    join cluster_articles ca on ca.article_id = a.id
+    join clusters c on c.id = ca.cluster_id
+    where c.active = true
+      and a.published_at is not null
+    order by a.published_at asc
+  `;
+  return rows
+    .filter((row) => !sources || sources.includes(row.source_id))
+    .map((row) => ({
+      id: row.article_id,
+      clusterId: row.cluster_id,
+      clusterLabel: row.cluster_label,
+      sourceId: row.source_id,
+      sourceName: row.source_name,
+      publishedAt: asIso(row.published_at) ?? row.published_at ?? "",
+      title: row.title,
+      url: row.url,
+    }))
+    .filter((event) => event.publishedAt !== "");
+}
+

@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { FEEDS } from "@backend/feeds.ts";
-import { getCluster, getTimeline, listClusters } from "@/lib/news/store";
+import { getArticleEvents, getCluster, getTimeline, listClusters } from "@/lib/news/store";
 import { ensureIngested, jobStatus, triggerIngest } from "@/lib/news/jobs";
 
 const sourcesSchema = z
@@ -49,4 +49,10 @@ export const fetchJob = createServerFn({ method: "GET" })
     const job = await jobStatus(data.jobId);
     if (!job) throw new Error("Job not found");
     return job;
+  });
+
+export const fetchArticleEvents = createServerFn({ method: "GET" })
+  .validator((input: unknown) => sourcesSchema.parse(input ?? {}))
+  .handler(async ({ data }) => {
+    return getArticleEvents(data?.sources ?? null);
   });
