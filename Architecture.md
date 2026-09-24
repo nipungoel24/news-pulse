@@ -8,7 +8,7 @@
 **Styling:** Tailwind v4 design tokens, Radix/shadcn primitives
 **UI primitives:** Button, sheet, badge, tooltip, skeleton, separator
 **Data/API:** TanStack Start server routes + `createServerFn`, Postgres via `@/lib/db`
-**Deployment:** Vercel (platform). Preview binds `0.0.0.0:8080`.
+**Deployment:** Railway (Docker container). Preview binds `0.0.0.0:8080`.
 
 ## Route map
 - `/` — timeline explorer

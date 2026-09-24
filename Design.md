@@ -1,7 +1,7 @@
 # Design.md
 
 ## Visual direction
-A broadsheet masthead on warm newsprint. Black-ink type, hairline rules, one oxblood signal for live/selection. The timeline should read like a compositor's galley: labeled bars laid on a dated rail, not a dashboard chart.
+A broadsheet masthead on warm newsprint. Black-ink type, hairline rules, one oxblood signal for live/selection. The Coverage Window reads like a newsroom story-map: four source lanes with article events as dots on a shared time axis, cluster connections as cross-lane bands on hover/selection.
 
 ## Tokens
 ### Colors
@@ -16,7 +16,8 @@ A broadsheet masthead on warm newsprint. Black-ink type, hairline rules, one oxb
 - warning: bronze `#8A5A2B`
 - error: oxblood `#9C2B1A`
 
-Cluster inks (timeline only): navy, umber, pine, slate, bronze, oxblood-muted, charcoal.
+Source lane colors: BBC `#2c4a62`, NPR `#2f4a3c`, Guardian `#4a4e3a`, Al Jazeera `#5a3d32`.
+Cluster highlight: oxblood `#9C2B1A`.
 
 ### Typography
 - display: Fraunces (masthead, cluster labels)
@@ -42,8 +43,8 @@ Cluster inks (timeline only): navy, umber, pine, slate, bronze, oxblood-muted, c
 ## Components
 - Button: rectangular, ink outline or oxblood solid
 - Source filter: toggle buttons with a bottom rule when on
-- Timeline bar: rounded 2px, height by article count
-- Sheet: paper surface, article list
+- Coverage Map: source lanes (72px each), article event dots (12px default, 16px active), SVG cluster bands
+- Cluster Detail Sheet: paper surface, article list
 - Skeleton: rule-colored pulse
 - Empty/error: plain ink copy, retry control
 
@@ -54,7 +55,8 @@ Cluster inks (timeline only): navy, umber, pine, slate, bronze, oxblood-muted, c
 
 ## Motion
 - Sheet open 250ms / close 150ms, opacity + translate
-- Bar hover: opacity only
+- Dot hover: scale + opacity, 150ms ease-out
+- Cluster band fade: 150ms
 - Reduced motion: instant state, no pulse on live dot
 
 ## Content

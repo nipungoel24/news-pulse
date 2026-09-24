@@ -215,7 +215,7 @@ The application is deployed and verified on Railway:
 
 - **Public URL**: https://news-pulse-production-4cef.up.railway.app
 - **Status**: Online and fully functional
-- **Deployed Commit**: `46e3fad` (feat: prepare container deployment)
+- **Deployed Commit**: `01a91ba` (feat(ui): redesign Coverage Window as source-lane article event map)
 - **Database**: Embedded PGLite (in-memory, ephemeral — data does not survive redeployment/restart)
 - **Verified**: All API endpoints, ingestion pipeline, and frontend UI
 
